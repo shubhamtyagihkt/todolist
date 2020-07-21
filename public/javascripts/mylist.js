@@ -362,7 +362,7 @@ function getAllItems() {
 		type: "POST",
 		contentType: "application/json",
 		data: JSON.stringify({}),
-		url: "http://localhost:3000/backend/getItems",
+		url: "/backend/getItems",
 		success: function(response) {
 			if(response.status == "success") {
 				// console.log(response.status);
@@ -391,7 +391,7 @@ function changeStatus(myid, mystatus) {
 		type: "POST",
 		contentType: "application/json",
 		data: JSON.stringify({"id": myid, "status": mystatus}),
-		url: "http://localhost:3000/backend/changeStatus",
+		url: "/backend/changeStatus",
 		success: function(response) {
 			if(response.status == "success") {
 				
@@ -413,7 +413,7 @@ function addElementDB(id, desc, status) {
 		type: "POST",
 		contentType: "application/json",
 		data: JSON.stringify({"id": id, "description": desc, "status": status}),
-		url: "http://localhost:3000/backend/addElement",
+		url: "/backend/addElement",
 		success: function(response) {
 			if(response.status == "success") {
 				
