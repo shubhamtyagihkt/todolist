@@ -1,6 +1,6 @@
-document.getElementById("nav-mylist").classList.add("active");
-
 $(document).ready(function () {
+	document.getElementById("nav-mylist").classList.add("active");
+
 	$("#sidebar-toggle").click(function(e) {
 	    e.preventDefault();
 	    $("#list-sidebar-wrapper").toggleClass("active");
@@ -17,185 +17,83 @@ $(document).ready(function () {
 		}
 	});
 
-	if($(window).width() < 768) {
-	  $('#list-sidebar-wrapper').toggleClass('active');
-
-		if($("#list-sidebar-wrapper").hasClass("active")) {
-			$("#list-sidebar").show();
-			$("#list-sidebar").css({opacity: 1});
-			$("#list-div").css({width: "60%"});
-		}
-		else {
-			$("#list-sidebar").hide();
-			$("#list-sidebar").css({opacity: 0});
-			$("#list-div").css({width: "80%"});
-		}
-	}
-
-	getAllItems();
-	console.log("Top print");
+	showItems("All");
 });
 
 
 
 
-var newItemId = 11;
-var items;
+function allowChange() {
+	$('#list').off('click', '.cross').on('click', '.cross', function(e) {
+		// console.log("Cross");
+	  	markDeleted($(this).parent().attr("id"));
+	  	return false;
+	});
 
-// var items = [
-// 	{	"id": 1,
-// 		"description": `Create a new webpage`,
-// 		"status": "Pending"
-// 	},
-// 	{	"id": 2,
-// 		"description": `Learn HTML`,
-// 		"status": "Done"
-// 	},
-// 	{	"id": 3,
-// 		"description": `Learn CSS`,
-// 		"status": "Done"
-// 	},
-// 	{	"id": 4,
-// 		"description": `Learn JavaScript`,
-// 		"status": "Pending"
-// 	},
-// 	{	"id": 5,
-// 		"description": `Learn Bla Bla`,
-// 		"status": "Deleted"
-// 	},
-// 	{	"id": 6,
-// 		"description": `Learn NodeJS`,
-// 		"status": "Pending"
-// 	},
-// 	{
-// 		"id": 7,
-// 		"description": `Learn Bootstrap`,
-// 		"status": "Done"
-// 	}
-// ];
+	$('#list').off('click', '.edit').on('click', '.edit', function(e) {
+		// console.log("Edit");
+		var item = $(this).parent();
+	  	var contentChild = item.children(".content");
+	  	var content = contentChild.html();
+	  	item.toggleClass("allowChange");
+	  	item.toggleClass("allowEdit");
+	  	item.html(`<input data-original="`+content+`" class="edit-input" type="text" value="`+content+`" /><span class="edit-tick"><i class="fas fa-check"></i></span><span class="edit-cross"><i class="fas fa-times"></i></span>`);
+	  	return false;
+	});	
 
+	$("#list").off("click", ".allowChange").on("click", ".allowChange", function(){
+		// console.log("Toggle");
+		$(this).toggleClass('checked');
 
+		if($(this).hasClass('checked')) {
+			markDone($(this).attr("id"));
+		}
+		else {
+			markPending($(this).attr("id"));
+		}
+		return false;
+	});
 
+	$('#list').off('click', '.edit-tick').on('click', '.edit-tick', function(e) {
+		// console.log("Tick");
+	  	var item = $(this).parent();
+	  	editItem(item);
+	  	return false;
+	});
 
-// var items = {
-// 	3: {	
-// 		"id": 3,
-// 		"description": `Learn CSS`,
-// 		"status": "Done"
-// 	},
-// 	2: {	
-// 		"id": 2,
-// 		"description": `Learn HTML`,
-// 		"status": "Done"
-// 	},
-// 	1: {	
-// 		"id": 1,
-// 		"description": `Create a new webpage`,
-// 		"status": "Pending"
-// 	},
-// 	4: {	
-// 		"id": 4,
-// 		"description": `Learn JavaScript`,
-// 		"status": "Pending"
-// 	},
-// 	5: {	
-// 		"id": 5,
-// 		"description": `Learn Bla Bla`,
-// 		"status": "Deleted"
-// 	},
-// 	6: {	
-// 		"id": 6,
-// 		"description": `Learn NodeJS`,
-// 		"status": "Pending"
-// 	},
-// 	7: {
-// 		"id": 7,
-// 		"description": `Learn Bootstrap`,
-// 		"status": "Done"
-// 	}
-// };
-
-
-
-
-function addElement() {
-	var item = document.getElementById("list-new-input").value;
-	newItemId = items.length + 1;
-	if(item == "") {
-		alert("Please write something!");
-		return;
-	}
-
-	console.log(item);
-	// call backend function to add in database
-	addElementDB(newItemId, item, "Pending");
-
-	addElementInList(newItemId, item, "Pending");
-
-	var mylist = document.getElementById("list");
-
-	var listItems = mylist.innerHTML;
-
-	listItems += `
-		<li id="`+newItemId+`">`+item+`<span class="cross"><i class="fas fa-times-circle"></i></span></li>
-	`;
-
-
-	mylist.innerHTML = listItems;
-
-	document.getElementById("list-new-input").value = "";
-
-	$("#list li").click(function(){
-	  $(this).toggleClass('checked');
-
-	  if($(this).hasClass('checked')) {
-	  	markDone($(this).attr("id"));
-	  }
-	  else {
-	  	markPending($(this).attr("id"));
-	  }
+	$('#list').off('click', '.edit-cross').on('click', '.edit-cross', function(e) {
+		// console.log("Cancel");
+		var item = $(this).parent();
+	  	var contentChild = item.children(".edit-input");
+	  	var content = contentChild.attr("data-original");
+	  	item.toggleClass("allowChange");
+	  	item.toggleClass("allowEdit");
+	  	item.html(`<span class="content">`+content+`</span><span class="edit"><i class="fas fa-edit"></i></span><span class="cross"><i class="fas fa-times-circle"></i></span>`);
+	  	return false;
 	});
 }
 
 
 
 
-$('#list').on('click', '.cross', function() {
-  markDeleted($(this).parent().attr("id"));
-  $(this).parent().remove();
-  //$(this).parent().fadeOut(300, function(){ $(this).remove(); });
-});
-
-
-
-
 function showItems(category) {
 	$("#categories li").removeClass("active");
+	$("#list").hide();
+	$("#addNew").hide();
+	$("#loader").show();
 
 	if(category == "All") {
-		showAllItems(items);
-		$("#category-all").addClass("active");
+		getAllItems();
 	}
-	else if(category == "Pending") {
-		showPendingItems(items);
-		$("#category-pending").addClass("active");
-	}
-	else if(category == "Done") {
-		showDoneItems(items);
-		$("#category-done").addClass("active");
-	}
-	else if(category == "Deleted") {
-		showDeletedItems(items);
-		$("#category-deleted").addClass("active");
+	else {
+		getCategoryItems(category);
 	}
 }
 
 
-
-
 function showAllItems(items) {
 	var l = items.length;
-	
+
 	document.getElementById("list").innerHTML = "";
 
 	for(var i = 0; i < l; i++) {
@@ -204,22 +102,16 @@ function showAllItems(items) {
 		addItem(item, "All");
 	}
 
-	$("#list li").click(function(){
-	  $(this).toggleClass('checked');
+	allowChange();
 
-	  if($(this).hasClass('checked')) {
-	  	markDone($(this).attr("id"));
-	  }
-	  else {
-	  	markPending($(this).attr("id"));
-	  }
-	});
+	$("#category-all").addClass("active");
+	$("#list").show();
+	$("#loader").hide();
+	$("#addNew").show();
 }
 
 
-
-
-function showPendingItems(items) {
+function showCategoryItems(items, category) {
 	var l = items.length;
 
 	document.getElementById("list").innerHTML = "";
@@ -227,66 +119,25 @@ function showPendingItems(items) {
 	for(var i = 0; i < l; i++) {
 		var item = items[i];
 
-		if(item.status == "Pending")
-			addItem(item, "Pending");
+		if(item.status == category)
+			addItem(item, category);
 	}
 
-	$("#list li").click(function(){
-	  $(this).toggleClass('checked');
-
-	  if($(this).hasClass('checked')) {
-	  	markDone($(this).attr("id"));
-	  }
-	  else {
-	  	markPending($(this).attr("id"));
-	  }
-	});
-}
-
-
-
-
-function showDoneItems(items) {
-	var l = items.length;
-
-	document.getElementById("list").innerHTML = "";
-
-	for(var i = 0; i < l; i++) {
-		var item = items[i];
-
-		if(item.status == "Done")
-			addItem(item, "Done");
+	if(category == "Pending") {
+		$("#category-pending").addClass("active");
+		allowChange();
+	}
+	else if(category == "Done") {
+		$("#category-done").addClass("active");
+		allowChange();
+	}
+	else if(category == "Deleted") {
+		$("#category-deleted").addClass("active");
 	}
 
-	$("#list li").click(function(){
-	  $(this).toggleClass('checked');
-
-	  if($(this).hasClass('checked')) {
-	  	markDone($(this).attr("id"));
-	  }
-	  else {
-	  	markPending($(this).attr("id"));
-	  }
-	});
+	$("#list").show();
+	$("#loader").hide();
 }
-
-
-
-
-function showDeletedItems(items) {
-	var l = items.length;
-
-	document.getElementById("list").innerHTML = "";
-
-	for(var i = 0; i < l; i++) {
-		var item = items[i];
-
-		if(item.status == "Deleted")
-			addItem(item, "Deleted");
-	}
-}
-
-
 
 
 function addItem(item, category) {
@@ -300,17 +151,17 @@ function addItem(item, category) {
 
 	if(item.status == "Done") {
 		listItems += `
-			<li id="`+item.id+`" class="checked">`+item.description+`<span class="cross"><i class="fas fa-times-circle"></i></span></li>
+			<li class="allowChange checked" id="`+item.id+`"><span class="content">`+item.description+`</span><span class="edit"><i class="fas fa-edit"></i></span><span class="cross"><i class="fas fa-times-circle"></i></span></li>
 		`;
 	}
 	else if(item.status == "Pending") {
 		listItems += `
-			<li id="`+item.id+`">`+item.description+`<span class="cross"><i class="fas fa-times-circle"></i></span></li>
+			<li class="allowChange" id="`+item.id+`"><span class="content">`+item.description+`</span><span class="edit"><i class="fas fa-edit"></i></span><span class="cross"><i class="fas fa-times-circle"></i></span></li>
 		`;
 	}
 	else if(item.status == "Deleted" && category == "Deleted") {
 		listItems += `
-			<li id="`+item.id+`">`+item.description+`</li>
+			<li id="`+item.id+`"><span class="content">`+item.description+`</span></li>
 		`;
 	}
 
@@ -321,43 +172,37 @@ function addItem(item, category) {
 
 
 function markDone(id) {
-	//call backend function to set status as Done
-
 	changeStatus(id, "Done");
-
-	items[id-1].status = "Done";
 }
+
 
 function markPending(id) {
-	//call backend function to set status as Pending
-
 	changeStatus(id, "Pending");
-
-	items[id-1].status = "Pending";
 }
+
 
 function markDeleted(id) {
-	//call backend function to set status as Deleted
-
 	changeStatus(id, "Deleted");
-
-	items[id-1].status = "Deleted";
 }
 
-function addElementInList(id, description, status) {
-	items[id-1] = {
-		"id": id,
-		"description": description,
-		"status": status
+
+
+
+function addElement() {
+	var itemValue = document.getElementById("list-new-input").value;
+
+	if(!itemValue) {
+		alert("Please write something!");
+		return;
 	}
+
+	addElementBackend(itemValue, "Pending");
 }
 
 
 
 
 function getAllItems() {
-	//Getting all items from backend/database via an API call
-
 	$.ajax({
 		type: "POST",
 		contentType: "application/json",
@@ -365,11 +210,30 @@ function getAllItems() {
 		url: "/backend/getItems",
 		success: function(response) {
 			if(response.status == "success") {
-				// console.log(response.status);
-				// console.log(response.items);
-				console.log("Bottom print");
-				items = response.items;
-				showAllItems(items);
+				showAllItems(response.items);
+			}
+			else {
+				console.log(response);
+			}
+		},
+		error: function(xhr, status, err) {
+			console.log(err.toString());
+		}
+	});
+}
+
+
+
+
+function getCategoryItems(category) {
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		data: JSON.stringify({"status": category}),
+		url: "/backend/getCategoryItems",
+		success: function(response) {
+			if(response.status == "success") {
+				showCategoryItems(response.items, category);
 			}
 			else {
 				console.log(response);
@@ -385,8 +249,6 @@ function getAllItems() {
 
 
 function changeStatus(myid, mystatus) {
-	//Changing status of an item via an API call
-
 	$.ajax({
 		type: "POST",
 		contentType: "application/json",
@@ -394,7 +256,9 @@ function changeStatus(myid, mystatus) {
 		url: "/backend/changeStatus",
 		success: function(response) {
 			if(response.status == "success") {
-				
+				if(mystatus == "Deleted") {
+					$("#"+myid).remove();
+				}
 			}
 			else {
 				console.log(response);
@@ -406,17 +270,53 @@ function changeStatus(myid, mystatus) {
 	});
 }
 
-function addElementDB(id, desc, status) {
-	//Changing status of an item via an API call
+
+
+
+function addElementBackend(mydescription, mystatus) {
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		data: JSON.stringify({"description": mydescription, "status": mystatus}),
+		url: "/backend/addElementBackend",
+		success: function(response) {
+			if(response.status == "success") {
+				showItems("All");
+
+				document.getElementById("list-new-input").value = "";
+			}
+			else {
+				console.log(response);
+			}
+		},
+		error: function(xhr, status, err) {
+			console.log(err.toString());
+		}
+	});
+}
+
+
+
+
+function editItem(item) {
+	var description = item.children(".edit-input").val();
+	var id = item.attr("id");
+	console.log(id);
+	if(!description) {
+		alert("Please write something!");
+		return;
+	}
 
 	$.ajax({
 		type: "POST",
 		contentType: "application/json",
-		data: JSON.stringify({"id": id, "description": desc, "status": status}),
-		url: "/backend/addElement",
+		data: JSON.stringify({"description": description, "id": id}),
+		url: "/backend/editItem",
 		success: function(response) {
 			if(response.status == "success") {
-				
+				item.toggleClass("allowChange");
+				item.toggleClass("allowEdit");
+				item.html(`<span class="content">`+description+`</span><span class="edit"><i class="fas fa-edit"></i></span><span class="cross"><i class="fas fa-times-circle"></i></span>`);
 			}
 			else {
 				console.log(response);

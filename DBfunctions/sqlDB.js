@@ -61,4 +61,14 @@ funcs.addItem = function(id, description, status, callback) {
 	return true;
 }
 
+funcs.editItem = function(id, description, callback) {
+	var qry = 'UPDATE items SET description = ? WHERE id = ?';
+
+	db.get().query(qry, [description, id], function (err, result) {
+		return callback(err, result);
+	});
+
+	return true;
+}
+
 module.exports = funcs;

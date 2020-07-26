@@ -104,4 +104,22 @@ router.post('/submitForm', function(req, res, next) {
 	});
 });
 
+router.post('/editItem', function(req, res, next) {
+
+	var id = req.body.id;
+	var description = req.body.description;
+	console.log("1hi");
+	if(!description || !id)
+		return res.json({ "status": "failed", "message": "Invalid Data!", "code": 500 });
+	console.log("2hi");
+	db.editItem(id, description, function (err, result) {
+		if (err) {
+			console.log(err);
+			return res.json({ "status": "failed", "message": "DB Error!", "code": 500 });
+		}
+
+		return res.json({ "status": "success", "message": "Items Received!", "code": 200 });
+	});
+});
+
 module.exports = router;

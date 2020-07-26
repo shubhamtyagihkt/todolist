@@ -202,3 +202,58 @@
 .addBtn:hover {
   background-color: #bbb;
 }
+
+.edit {
+  position: absolute;
+  right: 30px;
+  top: 0;
+  padding: 12px 16px 12px 16px;
+}
+
+.edit i {
+  transition: transform 0.2s linear;
+}
+
+.edit:hover i {
+  transform: scale(1.3);
+  transition: transform 0.2s linear;
+}
+
+.edit-input {
+  margin: 0;
+  border: 1px solid #9c9c9d;
+  border-radius: 5px;
+  outline: none;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.edit-input:focus {
+  border: 1px solid #313131;
+}
+
+.edit-tick {
+  padding: 12px 5px 12px 10px;
+}
+
+.edit-tick i {
+  transition: transform 0.2s linear;
+}
+
+.edit-tick:hover i {
+  transform: scale(1.2);
+  transition: transform 0.2s linear;
+}
+
+.edit-cross {
+  padding: 12px 10px 12px 5px;
+}
+
+.edit-cross i {
+  transition: transform 0.2s linear;
+}
+
+.edit-cross:hover i {
+  transform: scale(1.2);
+  transition: transform 0.2s linear;
+}
